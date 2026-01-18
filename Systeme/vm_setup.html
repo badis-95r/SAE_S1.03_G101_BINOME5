@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration VM - SAE S1.03</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">SAE S1.03</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="theorie.html">Théorie</a></li>
+                <li class="nav-item"><a class="nav-link active" href="vm_setup.html">Machine Virtuelle</a></li>
+                <li class="nav-item"><a class="nav-link" href="install_linux.html">Installation OS</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin_linux.html">Administration</a></li>
+                <li class="nav-item"><a class="nav-link" href="serveur_web.html">Serveur Web</a></li>
+                <li class="nav-item"><a class="nav-link" href="conclusion.html">Conclusion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="content-section">
+        <h1 class="mb-4">Partie II : Mise en place de la machine virtuelle</h1>
+        
+        <h2>Choix de la distribution : Ubuntu 24.04.3 LTS</h2>
+        <p>
+            Pour ce projet nous avons décidé d’utiliser la distribution <strong>Ubuntu 24.04.3 LTS ("Noble Numbat")</strong>. Ce choix repose sur plusieurs critères :
+        </p>
+        <ul>
+            <li><strong>Stabilité et Support à Long Terme (LTS) :</strong> Garantit des mises à jour de sécurité jusqu'en 2029.</li>
+            <li><strong>Modernité des outils :</strong> Intègre des versions récentes de Python, PHP, GCC, indispensables pour le développement.</li>
+            <li><strong>Adéquation professionnelle :</strong> Très utilisé en entreprise et dans le Cloud.</li>
+            <li><strong>Compatibilité :</strong> Support optimal pour VirtualBox et WebStorm.</li>
+        </ul>
+
+        <h2>1. Choix de l'hyperviseur : Oracle VM VirtualBox</h2>
+        <p>
+            Nous avons sélectionné <strong>Oracle VM VirtualBox</strong> (Type 2 / Hébergé) pour son caractère open-source et sa facilité de gestion de l'encapsulation (.vbox, .vdi).
+        </p>
+    </div>
+
+    <div class="content-section">
+        <h2>2. Configuration du matériel virtuel</h2>
+        <p>
+            Bien que la machine hôte dispose d'un Ryzen 7 et de 32 Go de RAM, nous avons configuré la VM pour être portable sur les machines de l'IUT (souvent 8 Go de RAM).
+        </p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <figure class="figure">
+                    <img src="assets/image1.png" class="figure-img img-fluid rounded" alt="Création de la VM">
+                    <figcaption class="figure-caption">Nom de la VM : Serveur_SAE_binome5</figcaption>
+                </figure>
+            </div>
+            <div class="col-md-6">
+                <h3>Allocation RAM</h3>
+                <p><strong>4096 Mo (4 Go) :</strong> Respecte le minimum pour Ubuntu tout en laissant des ressources à l'hôte.</p>
+                <figure class="figure">
+                    <img src="assets/image2.png" class="figure-img img-fluid rounded" alt="Configuration RAM">
+                </figure>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Disque Dur</h3>
+                <p><strong>40 Go :</strong> Taille suffisante pour le système et les projets futurs.</p>
+                <figure class="figure">
+                    <img src="assets/image3.png" class="figure-img img-fluid rounded" alt="Configuration Disque">
+                </figure>
+            </div>
+            <div class="col-md-6">
+                <h3>Résumé de la configuration</h3>
+                <figure class="figure">
+                    <img src="assets/image4.png" class="figure-img img-fluid rounded" alt="Résumé Settings">
+                </figure>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Composant</th>
+                        <th>Allocation</th>
+                        <th>Justification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Processeur</td>
+                        <td>2 cœurs</td>
+                        <td>Garantit une exécution fluide sans impacter l'hôte.</td>
+                    </tr>
+                    <tr>
+                        <td>Virtualisation</td>
+                        <td>AMD-V / SVM</td>
+                        <td>Activée pour éviter l'émulation logicielle lente.</td>
+                    </tr>
+                    <tr>
+                        <td>Mémoire Vidéo</td>
+                        <td>128 MB</td>
+                        <td>Maximum autorisé pour une interface fluide.</td>
+                    </tr>
+                    <tr>
+                        <td>Accélération 3D</td>
+                        <td>Activée</td>
+                        <td>Décharge les calculs graphiques sur le GPU hôte.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>3. Configuration Avancée</h2>
+        
+        <h3>Méthode d'installation : Manuelle</h3>
+        <p>
+            Nous avons décoché "Unattended Installation" pour maîtriser chaque étape (partitionnement, nommage strict des comptes, configuration clavier AZERTY).
+        </p>
+
+        <h3>Réseau : Accès par pont (Bridged Adapter)</h3>
+        <p>
+            Nous avons remplacé le mode NAT par le mode <strong>Pont</strong>. Cela permet à la VM d'avoir sa propre adresse IP sur le réseau physique, rendant le serveur web accessible depuis n'importe quelle machine du réseau local (et facilitant le déploiement SSH).
+        </p>
+
+        <h3>Dossier Partagé</h3>
+        <p>
+            Un dossier <code>SharedFolderVM</code> a été mis en place (Auto-mount) pour faciliter le transfert de fichiers entre Windows et Ubuntu sans clé USB.
+        </p>
+    </div>
+</main>
+
+<footer class="text-center">
+    <div class="container">
+        <p class="mb-0">&copy; 2026 - SAE S1.03 - GEBAUER & RAHLI</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

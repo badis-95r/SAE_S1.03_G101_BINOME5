@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serveur Web - SAE S1.03</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">SAE S1.03</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="theorie.html">Théorie</a></li>
+                <li class="nav-item"><a class="nav-link" href="vm_setup.html">Machine Virtuelle</a></li>
+                <li class="nav-item"><a class="nav-link" href="install_linux.html">Installation OS</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin_linux.html">Administration</a></li>
+                <li class="nav-item"><a class="nav-link active" href="serveur_web.html">Serveur Web</a></li>
+                <li class="nav-item"><a class="nav-link" href="conclusion.html">Conclusion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="content-section">
+        <h1 class="mb-4">Partie IV : Installation et configuration du serveur Web</h1>
+        <p>
+            L'objectif est de transformer notre VM en un serveur capable d'héberger notre site web sur le réseau local.
+        </p>
+
+        <h2>1. Installation d'Apache2</h2>
+        <div class="code-block">
+            sudo apt update
+            sudo apt install apache2 -y
+        </div>
+        <p class="mt-2">
+            Nous avons vérifié le statut du service avec <code>sudo systemctl status apache2</code> et identifié l'IP avec <code>ip a</code>.
+        </p>
+    </div>
+
+    <div class="content-section">
+        <h2>2. Tests de fonctionnement</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <figure class="figure">
+                    <img src="assets/image13.png" class="figure-img img-fluid rounded" alt="Page par défaut Apache">
+                    <figcaption class="figure-caption">Page par défaut d'Apache accessible depuis l'hôte</figcaption>
+                </figure>
+            </div>
+            <div class="col-md-6">
+                <figure class="figure">
+                    <img src="assets/image14.png" class="figure-img img-fluid rounded" alt="Page PHP Info">
+                    <figcaption class="figure-caption">Test PHP (info.php) confirmant le fonctionnement du moteur</figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>3. Gestion des droits</h2>
+        <p>Pour permettre au groupe <code>binome5</code> de modifier les fichiers du site :</p>
+        <div class="code-block">
+            cd /var/www/html
+            sudo chown -R admin_gr101_binome5:binome5 .
+            sudo chmod -R 775 .
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>4. Déploiement automatisé avec WebStorm</h2>
+        <p>
+            Nous avons configuré une connexion SFTP dans l'IDE WebStorm pour synchroniser automatiquement nos fichiers locaux (Windows) avec le serveur (<code>/var/www/html</code>).
+        </p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Connexion SFTP</h3>
+                <p>Configuration de l'hôte (IP VM) et de l'authentification SSH.</p>
+                <figure class="figure">
+                    <img src="assets/image15.png" class="figure-img img-fluid rounded" alt="Configuration SFTP WebStorm">
+                </figure>
+            </div>
+            <div class="col-md-6">
+                <h3>Mappings de dossiers</h3>
+                <p>Liaison entre le dossier projet local et la racine web du serveur.</p>
+                <figure class="figure">
+                    <img src="assets/image16.png" class="figure-img img-fluid rounded" alt="Mappings WebStorm">
+                </figure>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="text-center">
+    <div class="container">
+        <p class="mb-0">&copy; 2026 - SAE S1.03 - GEBAUER & RAHLI</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

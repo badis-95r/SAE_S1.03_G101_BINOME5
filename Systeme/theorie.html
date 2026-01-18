@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Théorie - SAE S1.03</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">SAE S1.03</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link active" href="theorie.html">Théorie</a></li>
+                <li class="nav-item"><a class="nav-link" href="vm_setup.html">Machine Virtuelle</a></li>
+                <li class="nav-item"><a class="nav-link" href="install_linux.html">Installation OS</a></li>
+                <li class="nav-item"><a class="nav-link" href="admin_linux.html">Administration</a></li>
+                <li class="nav-item"><a class="nav-link" href="serveur_web.html">Serveur Web</a></li>
+                <li class="nav-item"><a class="nav-link" href="conclusion.html">Conclusion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="content-section">
+        <h1 class="mb-4">Partie I : Étude Théorique sur la Virtualisation</h1>
+        
+        <h2>1. Définition de la virtualisation</h2>
+        <p>
+            La virtualisation est une technologie logicielle permettant de créer et d'exécuter une ou plusieurs représentations virtuelles d'un ordinateur (Machines Virtuelles ou MV) sur une seule machine physique. Elle offre une abstraction du matériel, permettant au système d'exploitation de gérer efficacement le partage des ressources critiques (CPU, mémoire, stockage, réseau).
+        </p>
+
+        <h3>Problématique professionnelle et enjeux</h3>
+        <p>Le but principal est la consolidation des serveurs :</p>
+        <ul>
+            <li><strong>Optimisation :</strong> Un serveur physique classique est souvent sous-utilisé (5 à 15 % de sa capacité). La virtualisation permet d'atteindre des taux de consolidation élevés (jusqu'à 20:1).</li>
+            <li><strong>Économie :</strong> Réduction du nombre de machines physiques, de la consommation d'énergie et des coûts de maintenance.</li>
+            <li><strong>Fiabilité :</strong> Facilitation de la continuité d'activité en cas de panne grâce à l'indépendance matérielle.</li>
+        </ul>
+    </div>
+
+    <div class="content-section">
+        <h2>2. Comparaison des solutions techniques</h2>
+        <p>Indépendamment du type choisi, la virtualisation offre les propriétés clés suivantes :</p>
+        
+        <table class="table table-striped table-bordered mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Propriété / Avantage</th>
+                    <th>Description technique</th>
+                    <th>Impact pour l'entreprise</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Partitionnement</td>
+                    <td>Exécution de plusieurs SE indépendants sur une seule machine physique.</td>
+                    <td>Consolidation : Un seul serveur physique pour plusieurs services (Web, SQL, Mail).</td>
+                </tr>
+                <tr>
+                    <td>Isolation</td>
+                    <td>Les environnements sont cloisonnés ; une panne dans une MV n'affecte pas les autres.</td>
+                    <td>Sécurité accrue et fiabilité du système d'information.</td>
+                </tr>
+                <tr>
+                    <td>Encapsulation</td>
+                    <td>L'intégralité de la machine virtuelle est stockée dans un ou plusieurs fichiers (ex: .vdi, .vbox).</td>
+                    <td>Sauvegarde facilitée et archivage simplifié du poste de travail.</td>
+                </tr>
+                <tr>
+                    <td>Indépendance matérielle</td>
+                    <td>La machine virtuelle peut être déplacée et exécutée sur n'importe quel ordinateur hôte.</td>
+                    <td>Continuité d'activité facilitée en cas de panne du matériel physique.</td>
+                </tr>
+                <tr>
+                    <td>Économie d'énergie</td>
+                    <td>Optimisation du taux d'utilisation des processeurs (de 15% à 90%).</td>
+                    <td>Réduction des coûts et diminution de l'empreinte environnementale.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="mt-5">Comparaison entre Émulateur, Simulateur et Virtualisation</h3>
+        <table class="table table-hover table-bordered mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Concept</th>
+                    <th>Principe de fonctionnement</th>
+                    <th>Niveau de Performance</th>
+                    <th>Exemples d'usage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Émulateur</td>
+                    <td>Imite l'intégralité des couches matérielles et logicielles.</td>
+                    <td>Dégradée à très dégradée (traduction logicielle).</td>
+                    <td>Faire fonctionner Windows sur un hôte Linux ou une architecture différente.</td>
+                </tr>
+                <tr>
+                    <td>Simulateur</td>
+                    <td>Modélise le comportement logique d'un système complet pour l'étude.</td>
+                    <td>Variable (priorité à la précision mathématique).</td>
+                    <td>Étude de processus industriels ou de nouveaux composants matériels.</td>
+                </tr>
+                <tr>
+                    <td>Outil de Virtualisation</td>
+                    <td>Offre une abstraction du matériel réel tout en permettant une exécution directe sur le processeur (MPU).</td>
+                    <td>Élevée (proche du réel).</td>
+                    <td>Préparation d'un poste de développement isolé sur une machine physique.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="content-section">
+        <h2>3. Typologie des Hyperviseurs (VMM)</h2>
+        <table class="table table-bordered mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Type d'Hyperviseur</th>
+                    <th>Emplacement technique</th>
+                    <th>Avantages principaux</th>
+                    <th>Exemples</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Type 1 (Natif / Bare-metal)</td>
+                    <td>Installé directement sur le matériel physique.</td>
+                    <td>Performances maximales et noyau très léger/optimisé.</td>
+                    <td>Hyper-V (Intel), Xen.</td>
+                </tr>
+                <tr>
+                    <td>Type 2 (Hébergé / Hosted)</td>
+                    <td>S'exécute comme une application au-dessus du système d'exploitation hôte.</td>
+                    <td>Facilité d'installation et flexibilité du matériel virtuel.</td>
+                    <td>Oracle VM VirtualBox, VMware Workstation.</td>
+                </tr>
+                <tr>
+                    <td>Type 1-2 (Hybride)</td>
+                    <td>Solution intermédiaire combinant des éléments natifs et hébergés.</td>
+                    <td>Équilibre entre performance et facilité d'administration.</td>
+                    <td>Solutions spécifiques de serveurs hybrides.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer class="text-center">
+    <div class="container">
+        <p class="mb-0">&copy; 2026 - SAE S1.03 - GEBAUER & RAHLI</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
