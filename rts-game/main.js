@@ -5,6 +5,7 @@ import { InputHandler } from './input.js';
 class Main {
     constructor() {
         this.game = new Game(window.innerWidth, window.innerHeight);
+        window.gameInstance = this.game;
         this.renderer = new Renderer('game-canvas');
 
         // Eléments UI
@@ -14,6 +15,8 @@ class Main {
             startBtn: document.getElementById('start-btn'),
             troopCount: document.getElementById('troop-count'),
             cellCount: document.getElementById('cell-count'),
+            goldCount: document.getElementById('gold-count'),
+            buildCityBtn: document.getElementById('build-city-btn'),
             attackPercentInput: document.getElementById('attack-percent'),
             attackPercentDisplay: document.getElementById('attack-percent-display')
         };
@@ -28,7 +31,7 @@ class Main {
         img.onload = () => {
             console.log("Image chargée avec succès !");
             this.game.loadMapFromImage(img);
-            this.renderer.setMapImage(img); // Passer l'image au renderer
+            this.renderer.setMapImage(img, this.game); // Passer l'image au renderer
 
             // Démarrer la boucle seulement quand l'image est chargée
             this.lastTime = performance.now();
@@ -58,6 +61,13 @@ class Main {
     updateUI() {
         this.ui.troopCount.textContent = this.game.player.troops;
         this.ui.cellCount.textContent = this.game.player.cellsControlled;
+
+        if (this.game.state === 'PLAYING') {
+            this.ui.goldCount.textContent = this.game.player.gold;
+            if (this.ui.buildCityBtn) {
+                this.ui.buildCityBtn.disabled = this.game.player.gold < 500;
+            }
+        }
     }
 }
 
@@ -65,3 +75,4 @@ class Main {
 document.addEventListener('DOMContentLoaded', () => {
     new Main();
 });
+window.debugGame = function(gameObj) { window.gameInstance = gameObj; }

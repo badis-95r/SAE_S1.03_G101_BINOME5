@@ -18,10 +18,12 @@ export class Game {
             id: 'player1',
             color: '#3498db', // Bleu
             troops: 100,
+            gold: 0,
             cellsControlled: 0,
             attackPercent: 50,
             isPlayer: true,
-            controlledCells: []
+            controlledCells: [],
+            cities: []
         };
 
         this.player = this.entities['player1'];
@@ -73,6 +75,7 @@ export class Game {
                     owner: null,
                     isLand: isLand,
                     defense: 0, // Ajout de la valeur de défense
+                    hasCity: false,
                     x: x,
                     y: y
                 };
@@ -96,10 +99,12 @@ export class Game {
                 id: botId,
                 color: botColors[i % botColors.length],
                 troops: 100,
+                gold: 0,
                 cellsControlled: 1,
                 attackPercent: 50, // sera changé aléatoirement
                 isPlayer: false,
                 controlledCells: [],
+            cities: [],
                 lastAttackTime: performance.now(),
                 attackInterval: Math.random() * 3000 + 2000 // entre 2 et 5 secondes
             };
@@ -179,15 +184,61 @@ export class Game {
                 if (cell.owner !== null) {
                     const entity = this.entities[cell.owner];
                     if (entity && entity.cellsControlled > 0) {
-                        // Répartition simple : défense = troupes totales / nombre de cellules
-                        // Plus un territoire est grand, plus ses bordures sont faibles pour un même nombre de troupes
-                        cell.defense = Math.max(1, Math.floor(entity.troops / entity.cellsControlled));
+                        // Répartition simple : défense = troupes totales / nombre de cellules TERRESTRES
+                        if (cell.isLand) {
+                            cell.defense = Math.max(1, Math.floor(entity.troops / entity.cellsControlled));
+                        } else {
+                            // 1-to-1 combat sur l'océan
+                            cell.defense = 1;
+                        }
+                    } else if (entity && !cell.isLand) {
+                        cell.defense = 1;
                     }
                 } else {
                     cell.defense = 0; // Neutre
                 }
             }
         }
+
+        // Appliquer le bonus des villes (rayon de 4 cellules)
+        for (const id in this.entities) {
+            const entity = this.entities[id];
+            for (const city of entity.cities) {
+                const radius = 4;
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        const nx = city.x + dx;
+                        const ny = city.y + dy;
+
+                        // Si on est dans les limites de la grille et approximativement dans un cercle
+                        if (nx >= 0 && nx < this.gridWidth && ny >= 0 && ny < this.gridHeight && (dx*dx + dy*dy) <= radius*radius) {
+                            const nCell = this.grid[ny][nx];
+                            // Le bonus s'applique aux cellules terrestres du propriétaire
+                            if (nCell.owner === id && nCell.isLand) {
+                                nCell.defense *= 2; // Double la défense dans le rayon
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    buildCity(entityId, targetX, targetY) {
+        if (this.state !== 'PLAYING') return false;
+        if (targetX < 0 || targetX >= this.gridWidth || targetY < 0 || targetY >= this.gridHeight) return false;
+
+        const entity = this.entities[entityId];
+        if (!entity || entity.gold < 500) return false;
+
+        const cell = this.grid[targetY][targetX];
+        if (cell.owner === entityId && cell.isLand && !cell.hasCity) {
+            entity.gold -= 500;
+            cell.hasCity = true;
+            entity.cities.push({x: targetX, y: targetY});
+            return true;
+        }
+        return false;
     }
 
     attack(entityId, targetX, targetY) {
@@ -226,7 +277,7 @@ export class Game {
             let isBorder = false;
 
             for (const n of neighbors) {
-                if (this.grid[n.y][n.x].owner !== entity.id && this.grid[n.y][n.x].isLand) {
+                if (this.grid[n.y][n.x].owner !== entity.id) {
                     isBorder = true;
                     break;
                 }
@@ -270,6 +321,21 @@ export class Game {
             for (const id in this.entities) {
                 const entity = this.entities[id];
                 entity.troops += entity.cellsControlled;
+
+                // Génération d'or : 1 or par 10 cellules terrestres
+                entity.gold += Math.floor(entity.cellsControlled / 10);
+
+                // Mettre à jour les villes
+                const validCities = [];
+                for (let i = 0; i < entity.cities.length; i++) {
+                    const city = entity.cities[i];
+                    const cell = this.grid[city.y][city.x];
+                    if (cell.owner === id && cell.hasCity) {
+                        validCities.push(city);
+                        entity.gold += 5; // +5g/tick par ville
+                    }
+                }
+                entity.cities = validCities;
             }
             // Mettre à jour la défense statique des cellules à chaque tick
             this.updateDefenses();
@@ -334,7 +400,7 @@ export class Game {
             let isBorder = false;
             for (const n of neighbors) {
                 const nCell = this.grid[n.y][n.x];
-                if (nCell.isLand && nCell.owner !== entity.id) {
+                if (nCell.owner !== entity.id) {
                     isBorder = true;
                     break;
                 }
@@ -348,7 +414,7 @@ export class Game {
 
         const startCell = borderCells[Math.floor(Math.random() * borderCells.length)];
 
-        // Chercher une cellule terrestre cible dans un rayon proche (ex: 5-15 cases)
+        // Chercher une cellule cible dans un rayon proche (ex: 5-15 cases)
         const radius = Math.floor(Math.random() * 10) + 5;
         const angle = Math.random() * Math.PI * 2;
 
@@ -356,9 +422,7 @@ export class Game {
         const targetY = Math.floor(startCell.y + Math.sin(angle) * radius);
 
         if (targetX >= 0 && targetX < this.gridWidth && targetY >= 0 && targetY < this.gridHeight) {
-            if (this.grid[targetY][targetX].isLand) {
-                return { x: targetX, y: targetY };
-            }
+            return { x: targetX, y: targetY };
         }
 
         return null;
@@ -383,7 +447,7 @@ class Expansion {
         const neighbors = this.game.getNeighbors(startX, startY);
         for (const n of neighbors) {
              const cell = this.game.grid[n.y][n.x];
-             if (cell.isLand && cell.owner !== this.entityId) {
+             if (cell.owner !== this.entityId) {
                  this.frontier.push(n);
                  this.visited.add(`${n.x},${n.y}`);
              }
@@ -396,8 +460,8 @@ class Expansion {
         }
 
         if (currentTime - this.lastStepTime >= this.stepDelay) {
-            this.step();
-            this.lastStepTime = currentTime;
+            const delayMultiplier = this.step();
+            this.lastStepTime = currentTime + (delayMultiplier - 1) * this.stepDelay;
         }
 
         return false;
@@ -419,10 +483,18 @@ class Expansion {
             // Recalculer la défense en temps réel au cas où elle a changé depuis le tick
             const oldOwner = this.game.entities[cell.owner];
             if (oldOwner && oldOwner.cellsControlled > 0) {
-                cell.defense = Math.max(1, Math.floor(oldOwner.troops / oldOwner.cellsControlled));
+                if (cell.isLand) {
+                    cell.defense = Math.max(1, Math.floor(oldOwner.troops / oldOwner.cellsControlled));
+                } else {
+                    cell.defense = 1;
+                }
+            } else if (oldOwner && !cell.isLand) {
+                cell.defense = 1;
             }
             costToCapture = cell.defense;
         }
+
+        const delayMultiplier = cell.isLand ? 1 : 2; // Océan est 2x plus lent
 
         // A-t-on assez de troupes sur le front pour capturer ?
         if (this.remainingTroops >= costToCapture) {
@@ -431,7 +503,9 @@ class Expansion {
             if (cell.owner !== null && cell.owner !== this.entityId) {
                 const oldOwner = this.game.entities[cell.owner];
                 if (oldOwner) {
-                    oldOwner.cellsControlled = Math.max(0, oldOwner.cellsControlled - 1);
+                    if (cell.isLand) {
+                        oldOwner.cellsControlled = Math.max(0, oldOwner.cellsControlled - 1);
+                    }
                     // L'ancien propriétaire perd des troupes (défenseurs morts)
                     oldOwner.troops = Math.max(0, oldOwner.troops - costToCapture);
                 }
@@ -440,7 +514,13 @@ class Expansion {
             // Capture réussie
             cell.owner = this.entityId;
             cell.defense = 0; // Remettre à 0, sera mis à jour au prochain tick
-            entity.cellsControlled++;
+
+            if (cell.isLand) {
+                entity.cellsControlled++;
+                if (cell.hasCity) {
+                    entity.cities.push({x: current.x, y: current.y});
+                }
+            }
             entity.controlledCells.push({ x: current.x, y: current.y });
 
             // Soustraire le coût
@@ -452,7 +532,7 @@ class Expansion {
                 const key = `${n.x},${n.y}`;
                 if (!this.visited.has(key)) {
                     const nCell = this.game.grid[n.y][n.x];
-                    if (nCell.isLand && nCell.owner !== this.entityId) {
+                    if (nCell.owner !== this.entityId) {
                         this.frontier.push(n);
                         this.visited.add(key);
                     }
@@ -472,5 +552,7 @@ class Expansion {
             this.remainingTroops = 0;
             // Ne pas ajouter les voisins, l'expansion s'arrête net ici.
         }
+
+        return delayMultiplier;
     }
 }
