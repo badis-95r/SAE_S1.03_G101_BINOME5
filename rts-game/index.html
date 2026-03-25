@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTS Game MVP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="ui-container">
+        <div id="stats-panel">
+            <p>Troupes: <span id="troop-count">100</span></p>
+            <p>Cellules: <span id="cell-count">1</span></p>
+        </div>
+        <div id="controls-panel">
+            <label for="attack-percent">Troupes à envoyer: <span id="attack-percent-display">50</span>%</label>
+            <input type="range" id="attack-percent" min="0" max="100" value="50">
+        </div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
