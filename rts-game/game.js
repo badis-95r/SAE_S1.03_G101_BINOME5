@@ -71,6 +71,7 @@ export class Game {
                 this.grid[y][x] = {
                     owner: null,
                     isLand: isLand,
+                    defense: 0, // Ajout de la valeur de défense
                     x: x,
                     y: y
                 };
@@ -169,6 +170,25 @@ export class Game {
         return true;
     }
 
+    // Calcule la défense de chaque cellule à chaque tick
+    updateDefenses() {
+        for (let y = 0; y < this.gridHeight; y++) {
+            for (let x = 0; x < this.gridWidth; x++) {
+                const cell = this.grid[y][x];
+                if (cell.owner !== null) {
+                    const entity = this.entities[cell.owner];
+                    if (entity && entity.cellsControlled > 0) {
+                        // Répartition simple : défense = troupes totales / nombre de cellules
+                        // Plus un territoire est grand, plus ses bordures sont faibles pour un même nombre de troupes
+                        cell.defense = Math.max(1, Math.floor(entity.troops / entity.cellsControlled));
+                    }
+                } else {
+                    cell.defense = 0; // Neutre
+                }
+            }
+        }
+    }
+
     attack(entityId, targetX, targetY) {
         if (this.state !== 'PLAYING') return;
         if (targetX < 0 || targetX >= this.gridWidth || targetY < 0 || targetY >= this.gridHeight) return;
@@ -250,6 +270,8 @@ export class Game {
                 const entity = this.entities[id];
                 entity.troops += entity.cellsControlled;
             }
+            // Mettre à jour la défense statique des cellules à chaque tick
+            this.updateDefenses();
             this.lastTickTime = currentTime;
         }
 
@@ -381,50 +403,73 @@ class Expansion {
     }
 
     step() {
-        this.frontier.sort((a, b) => {
-            const distA = Math.pow(a.x - this.targetX, 2) + Math.pow(a.y - this.targetY, 2);
-            const distB = Math.pow(b.x - this.targetX, 2) + Math.pow(b.y - this.targetY, 2);
-            return distA - distB;
-        });
+        // Optionnel : ne plus trier permet un vrai "flood fill" régulier sans "pics" fins
+        // qui se croisent, ce qui crée des frontières beaucoup plus propres (cercles/ronds d'expansion)
+        // Laissons le tri commenté ou supprimons-le pour un comportement de combat plus naturel.
 
         const current = this.frontier.shift();
-
         const cell = this.game.grid[current.y][current.x];
         const entity = this.game.entities[this.entityId];
 
-        // Gérer le combat si la cellule appartient à un autre joueur
+        let costToCapture = 1; // Coût de base pour capturer du neutre
+
+        // S'il y a un propriétaire ennemi, calculer le coût de combat
         if (cell.owner !== null && cell.owner !== this.entityId) {
-            // Simplification: le dernier arrivé vole la case,
-            // on enlève la case à l'ancien propriétaire.
+            // Recalculer la défense en temps réel au cas où elle a changé depuis le tick
             const oldOwner = this.game.entities[cell.owner];
-            if (oldOwner) {
-                oldOwner.cellsControlled = Math.max(0, oldOwner.cellsControlled - 1);
-                // On pourrait enlever de la liste controlledCells mais c'est lourd (filter),
-                // on vérifie la propriété lors des parcours de bordure plutôt.
+            if (oldOwner && oldOwner.cellsControlled > 0) {
+                cell.defense = Math.max(1, Math.floor(oldOwner.troops / oldOwner.cellsControlled));
             }
+            costToCapture = cell.defense;
         }
 
-        if (cell.owner !== this.entityId) {
+        // A-t-on assez de troupes sur le front pour capturer ?
+        if (this.remainingTroops >= costToCapture) {
+
+            // Gérer le retrait à l'ancien propriétaire s'il y en a un
+            if (cell.owner !== null && cell.owner !== this.entityId) {
+                const oldOwner = this.game.entities[cell.owner];
+                if (oldOwner) {
+                    oldOwner.cellsControlled = Math.max(0, oldOwner.cellsControlled - 1);
+                    // L'ancien propriétaire perd des troupes (défenseurs morts)
+                    oldOwner.troops = Math.max(0, oldOwner.troops - costToCapture);
+                }
+            }
+
+            // Capture réussie
             cell.owner = this.entityId;
+            cell.defense = 0; // Remettre à 0, sera mis à jour au prochain tick
             entity.cellsControlled++;
             entity.controlledCells.push({ x: current.x, y: current.y });
 
-            this.remainingTroops--;
-        }
+            // Soustraire le coût
+            this.remainingTroops -= costToCapture;
 
-        if (this.remainingTroops <= 0) return;
-
-        const neighbors = this.game.getNeighbors(current.x, current.y);
-        for (const n of neighbors) {
-            const key = `${n.x},${n.y}`;
-            if (!this.visited.has(key)) {
-                const nCell = this.game.grid[n.y][n.x];
-                // On ne s'étend que sur la terre
-                if (nCell.isLand && nCell.owner !== this.entityId) {
-                    this.frontier.push(n);
-                    this.visited.add(key);
+            // Ajouter les voisins à la frontière (on continue l'expansion)
+            const neighbors = this.game.getNeighbors(current.x, current.y);
+            for (const n of neighbors) {
+                const key = `${n.x},${n.y}`;
+                if (!this.visited.has(key)) {
+                    const nCell = this.game.grid[n.y][n.x];
+                    if (nCell.isLand && nCell.owner !== this.entityId) {
+                        this.frontier.push(n);
+                        this.visited.add(key);
+                    }
                 }
             }
+        } else {
+            // L'attaque échoue sur cette cellule car pas assez de troupes.
+            // On inflige des dégâts partiels à l'ennemi (s'il y en a un)
+            if (cell.owner !== null && cell.owner !== this.entityId) {
+                const oldOwner = this.game.entities[cell.owner];
+                if (oldOwner) {
+                    oldOwner.troops = Math.max(0, oldOwner.troops - this.remainingTroops);
+                }
+            }
+
+            // On a utilisé toutes nos troupes sans capturer la cellule
+            this.remainingTroops = 0;
+            // Ne pas ajouter les voisins, l'expansion s'arrête net ici.
         }
     }
 }

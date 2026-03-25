@@ -21,15 +21,18 @@ class Main {
         this.inputHandler = new InputHandler(this.renderer.canvas, this.game, this.renderer, this.ui);
 
         this.loadMap();
-
-        this.lastTime = performance.now();
-        this.loop(this.lastTime);
     }
 
     loadMap() {
         const img = new Image();
         img.onload = () => {
+            console.log("Image chargée avec succès !");
             this.game.loadMapFromImage(img);
+            this.renderer.setMapImage(img); // Passer l'image au renderer
+
+            // Démarrer la boucle seulement quand l'image est chargée
+            this.lastTime = performance.now();
+            this.loop(this.lastTime);
         };
         img.src = 'map.png'; // Chemin vers l'image
     }
