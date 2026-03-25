@@ -9,7 +9,7 @@ export class InputHandler {
     }
 
     init() {
-        // Clic sur le canvas pour attaquer
+        // Clic sur le canvas
         this.canvas.addEventListener('click', (e) => {
             const rect = this.canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -18,12 +18,29 @@ export class InputHandler {
             // Convertir le clic écran en coordonnées de grille
             const { gridX, gridY } = this.renderer.screenToGrid(x, y, this.game.cellSize);
 
-            // Déclencher l'attaque vers cette cible
-            this.game.attack(gridX, gridY);
+            if (this.game.state === 'SPAWN_SELECTION') {
+                const success = this.game.setPlayerSpawn(gridX, gridY);
+                if (success) {
+                    this.ui.startBtn.disabled = false;
+                }
+            } else if (this.game.state === 'PLAYING') {
+                // Déclencher l'attaque vers cette cible
+                this.game.attack('player1', gridX, gridY);
+            }
         });
+
+        // Bouton Start
+        if (this.ui.startBtn) {
+            this.ui.startBtn.addEventListener('click', () => {
+                this.game.startGame();
+                if (this.ui.spawnUi) this.ui.spawnUi.classList.add('hidden');
+                if (this.ui.gameUi) this.ui.gameUi.classList.remove('hidden');
+            });
+        }
 
         // Molette de la souris pour ajuster le pourcentage
         this.canvas.addEventListener('wheel', (e) => {
+            if (this.game.state !== 'PLAYING') return;
             e.preventDefault(); // Empêcher le scroll de la page
 
             // Ajuster le pourcentage d'attaque (- ou + selon la direction du scroll)

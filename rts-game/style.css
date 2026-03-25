@@ -23,7 +23,70 @@ body, html {
     pointer-events: none; /* Let clicks pass through to canvas */
     display: flex;
     flex-direction: column;
+    justify-content: center;
+}
+
+#game-ui {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
+}
+
+#game-ui.hidden {
+    display: none;
+}
+
+#spawn-ui {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: auto;
+}
+
+#spawn-ui.hidden {
+    display: none;
+}
+
+#instruction-panel {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+#instruction-panel p {
+    margin: 5px 0;
+}
+
+#start-btn {
+    padding: 15px 30px;
+    font-size: 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+#start-btn:hover:not(:disabled) {
+    background-color: #27ae60;
+}
+
+#start-btn:disabled {
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 #stats-panel {

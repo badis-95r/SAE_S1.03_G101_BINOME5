@@ -9,6 +9,9 @@ class Main {
 
         // Eléments UI
         this.ui = {
+            gameUi: document.getElementById('game-ui'),
+            spawnUi: document.getElementById('spawn-ui'),
+            startBtn: document.getElementById('start-btn'),
             troopCount: document.getElementById('troop-count'),
             cellCount: document.getElementById('cell-count'),
             attackPercentInput: document.getElementById('attack-percent'),
@@ -17,8 +20,18 @@ class Main {
 
         this.inputHandler = new InputHandler(this.renderer.canvas, this.game, this.renderer, this.ui);
 
+        this.loadMap();
+
         this.lastTime = performance.now();
         this.loop(this.lastTime);
+    }
+
+    loadMap() {
+        const img = new Image();
+        img.onload = () => {
+            this.game.loadMapFromImage(img);
+        };
+        img.src = 'map.png'; // Chemin vers l'image
     }
 
     loop(currentTime) {

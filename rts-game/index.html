@@ -3,19 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTS Game MVP</title>
+    <title>RTS Game MVP - Phase 2</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="ui-container">
-        <div id="stats-panel">
-            <p>Troupes: <span id="troop-count">100</span></p>
-            <p>Cellules: <span id="cell-count">1</span></p>
+
+        <!-- UI pour la phase PLAYING (Cachée au départ) -->
+        <div id="game-ui" class="hidden">
+            <div id="stats-panel">
+                <p>Troupes: <span id="troop-count">0</span></p>
+                <p>Cellules: <span id="cell-count">0</span></p>
+            </div>
+            <div id="controls-panel">
+                <label for="attack-percent">Troupes à envoyer: <span id="attack-percent-display">50</span>%</label>
+                <input type="range" id="attack-percent" min="0" max="100" value="50">
+            </div>
         </div>
-        <div id="controls-panel">
-            <label for="attack-percent">Troupes à envoyer: <span id="attack-percent-display">50</span>%</label>
-            <input type="range" id="attack-percent" min="0" max="100" value="50">
+
+        <!-- UI pour la phase SPAWN_SELECTION -->
+        <div id="spawn-ui">
+            <div id="instruction-panel">
+                <p>Cliquez sur la terre (gris clair) pour placer votre capitale.</p>
+                <p>Analysez la position des bots avant de valider.</p>
+            </div>
+            <button id="start-btn" disabled>Start Game</button>
         </div>
+
     </div>
     <canvas id="game-canvas"></canvas>
 
