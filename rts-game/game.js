@@ -64,9 +64,10 @@ export class Game {
                 const r = data[i];
                 const g = data[i+1];
                 const b = data[i+2];
-                // L'image map.png a des continents en noir (ou très sombre) et de l'eau en blanc (ou clair).
-                // On considère que si le pixel est sombre (ex: moyenne rgb < 128), c'est de la terre.
-                const isLand = ((r + g + b) / 3) < 128;
+                const a = data[i+3];
+                // L'image map.png a des continents en noir (ou très sombre) et de l'eau en blanc (ou clair) ou transparent.
+                // On considère que si le pixel est sombre et opaque (ex: moyenne rgb < 128 et alpha élevé), c'est de la terre.
+                const isLand = a > 128 && ((r + g + b) / 3) < 128;
 
                 this.grid[y][x] = {
                     owner: null,
